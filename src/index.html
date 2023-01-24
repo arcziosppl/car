@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Popierdalacz</title>
+</head>
+<body>
+    <script>
+        window.addEventListener("gamepadconnected", ()=>{
+            setInterval(() => {
+                const gamepad = navigator.getGamepads()[0];
+                let axes1 = Math.floor(gamepad.axes[0]*90);
+                let speed = gamepad.buttons[7].value*255;
+                let speed2 = gamepad.buttons[6].value*255;
+                console.log(speed2);
+                const request = new XMLHttpRequest();
+                request.open("GET","/update?value=" + axes1 + "&value2=" + speed + "&value3=" + speed2,true);
+                request.send();
+            }, 100);
+        });
+        </script>
+</body>
+</html>
