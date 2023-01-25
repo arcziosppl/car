@@ -2,6 +2,9 @@
 #include "ESP8266WiFi.h"
 #include "ESPAsyncTCP.h"
 #include "ESPAsyncWebServer.h"
+#include "Servo.h"
+
+Servo servo;
 
 AsyncWebServer server(80);
 
@@ -83,6 +86,8 @@ void notFound(AsyncWebServerRequest *request) {
   request->send(404, "text/plain", "Not found");
 }
 
+int pos;
+
 
 void setup() {
 Serial.begin(9600);
@@ -103,6 +108,8 @@ pinMode(in4, OUTPUT);
 pinMode(en, OUTPUT);
 pinMode(en2, OUTPUT);
 analogWrite(en2, 255);
+
+servo.attach(D7);
 
 
   Serial.begin(9600);
@@ -128,8 +135,9 @@ analogWrite(en2, 255);
       axis = request->getParam("value")->value();
             speed = request->getParam("value2")->value();
             speed2 = request->getParam("value3")->value();
-            Serial.println(axis);
-                        Serial.println(speed2);
+            //Serial.println(axis);
+                       // Serial.println(speed2);
+                        pos = axis.toInt();
 
       analogWrite(en,speed.toInt());
       if(speed.toInt() == 0)
@@ -145,22 +153,7 @@ analogWrite(en2, 255);
               analogWrite(en,speed2.toInt());
         backward();
       }
-      if(axis.toInt() > 0)
-      {
-        right();
-      }
-      else
-      {
-               center();          
-      }
-      if(axis.toInt() < 0)
-      {
-        left();
-      }
-      else
-      {
-               center();          
-      }
+
     }
     
     request->send(200);
@@ -172,5 +165,6 @@ analogWrite(en2, 255);
 }
 
 void loop() {
-
+servo.write(pos);
+Serial.println(pos);
 }
