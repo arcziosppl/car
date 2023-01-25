@@ -17,6 +17,7 @@ const char* pass = "meus2229";
 #define in4 D3
 #define en D4
 #define en2 D5
+#define led D8
 
 void forward()
 {
@@ -36,22 +37,10 @@ void stop()
 digitalWrite(in2, LOW);
 }
 
-void left()
+void hand_brake()
 {
-  digitalWrite(in3, LOW);
-digitalWrite(in4, HIGH);
-}
-
-void right()
-{
-  digitalWrite(in3, HIGH);
-digitalWrite(in4, LOW);
-}
-
-void center()
-{
-    digitalWrite(in3, LOW);
-digitalWrite(in4, LOW);
+  digitalWrite(in1, HIGH);
+digitalWrite(in2, HIGH);
 }
 
 const char index_html[] PROGMEM = R"rawliteral(
@@ -71,9 +60,10 @@ const char index_html[] PROGMEM = R"rawliteral(
                 let axes1 = Math.floor(gamepad.axes[0]*90);
                 let speed = gamepad.buttons[7].value*255;
                 let speed2 = gamepad.buttons[6].value*255;
-                console.log(speed2);
+                let brake = gamepad.buttons[4].value;
+                console.log();
                 const request = new XMLHttpRequest();
-                request.open("GET","/update?value=" + axes1 + "&value2=" + speed + "&value3=" + speed2,true);
+                request.open("GET","/update?value=" + axes1 + "&value2=" + speed + "&value3=" + speed2 + "&value4=" + brake,true);
                 request.send();
             }, 100);
         });
@@ -107,7 +97,10 @@ pinMode(in3, OUTPUT);
 pinMode(in4, OUTPUT);
 pinMode(en, OUTPUT);
 pinMode(en2, OUTPUT);
+pinMode(led,OUTPUT);
 analogWrite(en2, 255);
+
+analogWrite(led, 10);
 
 servo.attach(D7);
 
@@ -129,12 +122,13 @@ servo.attach(D7);
   });
 
   server.on("/update", HTTP_GET, [](AsyncWebServerRequest *request){
-    String axis,speed,speed2;
+    String axis,speed,speed2,brake;
 
     if(request->hasParam("value")){
       axis = request->getParam("value")->value();
             speed = request->getParam("value2")->value();
             speed2 = request->getParam("value3")->value();
+            brake = request->getParam("value4")->value();
             //Serial.println(axis);
                        // Serial.println(speed2);
                         pos = axis.toInt();
@@ -152,6 +146,12 @@ servo.attach(D7);
       {
               analogWrite(en,speed2.toInt());
         backward();
+      }
+      if(brake.toInt() == 1)
+      {
+        backward();
+        delay(10);
+        hand_brake();
       }
 
     }

@@ -5,20 +5,121 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Popierdalacz</title>
+    <script src='https://cdn.plot.ly/plotly-2.18.0.min.js'></script>
+    <style>
+        body,html{
+            background: rgb(2,0,36);
+background: radial-gradient(circle, rgba(2,0,36,1) 0%, rgba(9,9,45,1) 35%, rgba(37,57,61,1) 100%);
+width: 100vw;
+height: 100vh;
+margin: 0;
+padding: 0;
+        }
+
+        .gauge{
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .ind{
+            display: flex;
+            position: absolute;
+            top: 400px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .ind img{
+            width: 60px;
+            height: 60px;
+            margin: 30px;
+            visibility: hidden;
+        }
+    </style>
 </head>
 <body>
-    <script>
+    <div id="myDiv" class="gauge"></div>
+    <div class="ind">
+        <img src="https://cdn-icons-png.flaticon.com/512/3097/3097059.png">
+        <img src="https://cdn-icons-png.flaticon.com/512/3096/3096997.png">
+        <img src="https://cdn-icons-png.flaticon.com/512/3097/3097079.png">
+    </div>
+  <script>
+
+    class request{
+        sp;
+    };
+
+    const new_request = new request();
+    const img = document.querySelectorAll(".ind img");
+
         window.addEventListener("gamepadconnected", ()=>{
             setInterval(() => {
                 const gamepad = navigator.getGamepads()[0];
                 let axes1 = Math.floor(gamepad.axes[0]*90);
                 let speed = gamepad.buttons[7].value*255;
                 let speed2 = gamepad.buttons[6].value*255;
-                console.log(speed2);
+                let brake = gamepad.buttons[4].value;
+                let light = gamepad.buttons[2].value;
+                new_request.sp = speed;
+                console.log();
+
+                img[0].style.visibility = "visible";
+
+                if(speed > 0){
+                    img[1].style.visibility = "visible"; //D
+                    img[0].style.visibility = "hidden"; //N
+                    img[2].style.visibility = "hidden"; //R
+                }
+                else
+                {
+                    img[1].style.visibility = "hidden";
+                }
+
+                if(speed2 > 0){
+                    img[1].style.visibility = "hidden"; //D
+                    img[0].style.visibility = "hidden"; //N
+                    img[2].style.visibility = "visible"; //R
+                }
+                else{
+                    img[2].style.visibility = "hidden"; //R
+
+                }
+
+
+
+
+
+
+
+                var data = [
+	{
+		domain: { x: [0, 1], y: [0, 1] },
+		value: speed,
+        bar: {color: "black"},
+        gauge: { axis: { visible: false, range: [0, 255]} },
+		title: { text: "Speed" },
+		type: "indicator",
+		mode: "gauge+number"
+	}
+];
+
+            var layout = {
+                 width: 600, 
+                 height: 500, 
+                 margin: { t: 0, b: 0 },
+                 paper_bgcolor: "transparent",
+                };
+            Plotly.newPlot('myDiv', data, layout);
+
+
                 const request = new XMLHttpRequest();
-                request.open("GET","/update?value=" + axes1 + "&value2=" + speed + "&value3=" + speed2,true);
+                request.open("GET","/update?value=" + axes1 + "&value2=" + speed + "&value3=" + speed2 + "&brake=" + brake,true);
                 request.send();
             }, 100);
+
         });
         </script>
 </body>
